@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui';
+
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
 
 import 'package:flutter_parkinson/sketcher.dart';
 import 'package:flutter_parkinson/drawn_line.dart';
