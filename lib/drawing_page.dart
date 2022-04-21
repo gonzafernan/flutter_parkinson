@@ -117,50 +117,24 @@ class _DrawingPageState extends State<DrawingPage> {
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
-          children: [buildButtonSave("SUBMIT"), buildButtonClear("clear")]),
+          children: [
+            buildButtonSave("SAVE DRAWING"),
+            buildButtonClear("SUBMIT WAVE"),
+            buildButtonClear("SUBMIT SPIRAL"),
+            Text(
+              category != null ? category!.label : 'NOT READY',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            )
+          ]),
     );
   }
 
   Widget buildButtonSave(String buttonText) {
-    return GestureDetector(
-      onTap: () async {
-        save();
-      },
-      child: const CircleAvatar(
-        child: Icon(
-          Icons.save,
-          size: 20.0,
-          color: Colors.white,
-        ),
-      ),
-      /*
-      child: TextButton(
-        style: TextButton.styleFrom(textStyle: const TextStyle(fontSize: 20)),
-        onPressed: () {},
-        child: Text(buttonText),
-      ),
-      */
-    );
+    return TextButton(onPressed: save, child: Text(buttonText));
   }
 
   Widget buildButtonClear(String buttonText) {
-    return GestureDetector(
-      onTap: getImage,
-      child: const CircleAvatar(
-        child: Icon(
-          Icons.create,
-          size: 20.0,
-          color: Colors.white,
-        ),
-      ),
-      /*
-      child: TextButton(
-        style: TextButton.styleFrom(textStyle: const TextStyle(fontSize: 20)),
-        onPressed: () {},
-        child: Text(buttonText),
-      ),
-      */
-    );
+    return TextButton(onPressed: getImage, child: Text(buttonText));
   }
 
   //============================================================================
@@ -170,11 +144,10 @@ class _DrawingPageState extends State<DrawingPage> {
     img.Image imageInput = img.decodeImage(_image!.readAsBytesSync())!;
     var pred = _classifier.predict(imageInput);
     print(pred);
-    /*
+
     setState(() {
       category = pred;
     });
-    */
   }
 
   Future getImage() async {
@@ -202,7 +175,7 @@ class _DrawingPageState extends State<DrawingPage> {
         children: [
           //buildAllPaths(context),
           buildCurrentPath(context),
-          buildButtonMenu()
+          buildButtonMenu(),
         ],
       ),
     );
