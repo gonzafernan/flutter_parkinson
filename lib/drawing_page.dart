@@ -1,13 +1,18 @@
+import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui';
 
+import 'package:image/image.dart' as img;
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 import 'package:flutter_parkinson/sketcher.dart';
 import 'package:flutter_parkinson/drawn_line.dart';
+import 'package:flutter_parkinson/classifier.dart';
+import 'package:flutter_parkinson/classifier_quant.dart';
 
 class DrawingPage extends StatefulWidget {
   const DrawingPage({Key? key}) : super(key: key);
@@ -18,6 +23,14 @@ class DrawingPage extends StatefulWidget {
 
 class _DrawingPageState extends State<DrawingPage> {
   final GlobalKey _globalKey = GlobalKey();
+
+  //============================================================================
+  // Classification model related
+  late Classifier _classifier;
+  File? _image;
+  final picker = ImagePicker();
+  Category? category;
+  //============================================================================
 
   // Line draw object
   List<DrawnLine> lines = <DrawnLine>[];
@@ -132,7 +145,7 @@ class _DrawingPageState extends State<DrawingPage> {
 
   Widget buildButtonClear(String buttonText) {
     return GestureDetector(
-      onTap: clear,
+      onTap: getImage,
       child: const CircleAvatar(
         child: Icon(
           Icons.create,
@@ -150,14 +163,35 @@ class _DrawingPageState extends State<DrawingPage> {
     );
   }
 
-  loadModel() async {
-    print("Result after loading model:");
+  //============================================================================
+  // Classification model related
+
+  void _predict() async {
+    img.Image imageInput = img.decodeImage(_image!.readAsBytesSync())!;
+    var pred = _classifier.predict(imageInput);
+    print(pred);
+    /*
+    setState(() {
+      category = pred;
+    });
+    */
   }
+
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image = File(pickedFile!.path);
+
+      _predict();
+    });
+  }
+  //============================================================================
 
   @override
   void initState() {
     super.initState();
-    loadModel();
+    _classifier = ClassifierQuant();
   }
 
   @override
