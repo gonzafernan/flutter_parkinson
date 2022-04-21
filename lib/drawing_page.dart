@@ -26,7 +26,8 @@ class _DrawingPageState extends State<DrawingPage> {
 
   //============================================================================
   // Classification model related
-  late Classifier _classifier;
+  late Classifier _spiral_classifier;
+  late Classifier _wave_classifier;
   File? _image;
   final picker = ImagePicker();
   Category? category;
@@ -103,13 +104,6 @@ class _DrawingPageState extends State<DrawingPage> {
     }
   }
 
-  Future<void> clear() async {
-    setState(() {
-      lines = [];
-      line = DrawnLine([], Colors.black, 5.0);
-    });
-  }
-
   Widget buildButtonMenu() {
     return Positioned(
       bottom: 50.0,
@@ -118,9 +112,9 @@ class _DrawingPageState extends State<DrawingPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            buildButtonSave("SAVE DRAWING"),
-            buildButtonClear("SUBMIT WAVE"),
-            buildButtonClear("SUBMIT SPIRAL"),
+            //buildButtonSave("SAVE DRAWING"),
+            buildButtonClear("SUBMIT SPIRAL", 0),
+            buildButtonClear("SUBMIT WAVE", 1),
             Text(
               category != null ? category!.label : 'NOT READY',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -133,16 +127,26 @@ class _DrawingPageState extends State<DrawingPage> {
     return TextButton(onPressed: save, child: Text(buttonText));
   }
 
-  Widget buildButtonClear(String buttonText) {
-    return TextButton(onPressed: getImage, child: Text(buttonText));
+  Widget buildButtonClear(String buttonText, int id) {
+    if (id == 0) {
+      return TextButton(onPressed: getSpiralImage, child: Text(buttonText));
+    } else {
+      return TextButton(onPressed: getWaveImage, child: Text(buttonText));
+    }
   }
 
   //============================================================================
   // Classification model related
 
-  void _predict() async {
-    img.Image imageInput = img.decodeImage(_image!.readAsBytesSync())!;
-    var pred = _classifier.predict(imageInput);
+  void _predict(Classifier classifier) async {
+    final RenderRepaintBoundary boundary =
+        _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final image = await boundary.toImage();
+    final byteData = await image.toByteData(format: ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+    img.Image imageInput = img.decodeImage(pngBytes)!;
+    var pred = classifier.predict(imageInput);
+    print(classifier.modelName);
     print(pred);
 
     setState(() {
@@ -150,13 +154,23 @@ class _DrawingPageState extends State<DrawingPage> {
     });
   }
 
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  Future getSpiralImage() async {
+    //final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     setState(() {
-      _image = File(pickedFile!.path);
+      //_image = File(pickedFile!.path);
 
-      _predict();
+      _predict(_spiral_classifier);
+    });
+  }
+
+  Future getWaveImage() async {
+    //final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      //_image = File(pickedFile!.path);
+
+      _predict(_wave_classifier);
     });
   }
   //============================================================================
@@ -164,7 +178,8 @@ class _DrawingPageState extends State<DrawingPage> {
   @override
   void initState() {
     super.initState();
-    _classifier = ClassifierQuant();
+    _spiral_classifier = ClassifierQuant('spiral_model_unquant.tflite');
+    _wave_classifier = ClassifierQuant('wave_model_unquant.tflite');
   }
 
   @override

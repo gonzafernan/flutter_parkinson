@@ -65,7 +65,7 @@ flutter:
   assets:
       - assets/labels.txt
       - assets/spiral_model_unquant.tflite
-      - asstes/wave_model_unquant.tflite
+      - assets/wave_model_unquant.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
